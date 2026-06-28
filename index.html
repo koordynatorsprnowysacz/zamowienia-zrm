@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0f1f3d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Zamówienia ZRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1f3d;--navy-mid:#1a3260;--blue:#1e54b7;--blue-light:#2d6ef5;
+  --accent:#e8f0fe;--accent-strong:#c5d8ff;--success:#0d7a55;--success-bg:#e6f4ee;
+  --danger:#c0392b;--danger-bg:#fdf0ee;--gray-50:#f8f9fc;--gray-100:#eef0f6;
+  --gray-200:#dde1ed;--gray-400:#8b93a8;--gray-600:#4b556e;--gray-900:#0f1724;
+  --radius-sm:8px;--radius:12px;--radius-lg:16px;
+  --shadow:0 4px 20px rgba(15,31,61,0.10);
+  --font:'Inter',sans-serif;--font-display:'DM Sans',sans-serif;--touch:48px;
+}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+header{background:var(--navy);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:18px;height:18px;fill:white}
+.logo-text{font-family:var(--font-display);font-size:15px;font-weight:700;color:white}
+.logo-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px}
+.header-date{font-size:11px;color:rgba(255,255,255,0.35);white-space:nowrap}
+.stepper-wrap{background:white;border-bottom:1px solid var(--gray-200);padding:0 0.5rem}
+.stepper{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;width:100%}
+.step{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:0;min-width:0}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:white;color:var(--gray-400);flex-shrink:0;transition:all 0.2s;position:relative}
+.step.active .step-num{background:var(--blue);border-color:var(--blue);color:white}
+.step.done .step-num{background:var(--success);border-color:var(--success);color:transparent}
+.step.done .step-num::after{content:'';position:absolute;left:7px;top:4px;width:5px;height:9px;border:2px solid white;border-top:none;border-left:none;transform:rotate(45deg)}
+.step-label{font-size:11px;font-weight:500;color:var(--gray-400);white-space:nowrap;text-decoration:none;font-style:normal}
+.step.active .step-label{color:var(--blue)}
+.step.done .step-label{color:var(--success)}
+@media(max-width:360px){.step-label{font-size:10px}} @media(max-width:300px){.step-label{display:none}}
+main{flex:1;padding:1rem 0.75rem 2rem}
+.form-card{max-width:720px;margin:0 auto;background:white;border-radius:var(--radius-lg);box-shadow:var(--shadow);border:1px solid var(--gray-200);overflow:hidden}
+.card-header{padding:1.25rem 1.25rem 1rem;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%)}
+.card-header h2{font-family:var(--font-display);font-size:18px;font-weight:700;color:white;margin-bottom:3px}
+.card-header p{font-size:13px;color:rgba(255,255,255,0.55)}
+.card-body{padding:1.25rem}
+.section{display:none}.section.active{display:block}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+.field select,.field input[type=text],.field input[type=date]{width:100%;height:var(--touch);padding:0 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;font-family:var(--font);color:var(--gray-900);background:white;outline:none;appearance:none;-webkit-appearance:none;transition:border-color 0.15s,box-shadow 0.15s}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b93a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+.field select:focus,.field input:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(45,110,245,0.12)}
+.field.error select,.field.error input{border-color:var(--danger);background:var(--danger-bg)}
+.field .err-msg{font-size:12px;color:var(--danger);margin-top:5px;display:none}
+.field.error .err-msg{display:block}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.grid-2{grid-template-columns:1fr}}
+.zrm-card{background:var(--accent);border:1px solid var(--accent-strong);border-radius:var(--radius-sm);padding:12px 14px;margin-top:8px;margin-bottom:1rem;display:none;align-items:center;gap:10px}
+.zrm-card.vis{display:flex}
+.zrm-pill{background:var(--blue);color:white;font-size:13px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap}
+.zrm-city{font-size:14px;color:var(--navy);font-weight:500}
+.search-wrap{position:relative;margin-bottom:12px}
+.search-wrap input{width:100%;height:44px;padding:0 14px 0 40px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:15px;font-family:var(--font);color:var(--gray-900);background:var(--gray-50);outline:none;-webkit-appearance:none;appearance:none}
+.search-wrap input:focus{border-color:var(--blue-light);background:white;box-shadow:0 0 0 3px rgba(45,110,245,0.08)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);pointer-events:none}
+.search-icon svg{width:16px;height:16px}
+.prod-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.prod-card{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;transition:border-color 0.15s}
+.prod-card.selected{border-color:var(--blue);background:var(--accent)}
+.prod-card.hidden-row{display:none}
+.prod-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.prod-name{font-size:14px;font-weight:500;color:var(--gray-900);line-height:1.3}
+.prod-cat{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:3px;text-transform:uppercase;letter-spacing:0.3px}
+.prod-card-bottom{display:flex;align-items:center;gap:10px}
+.qty-input{width:72px;height:40px;text-align:center;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;font-weight:500;font-family:var(--font);color:var(--gray-900);background:white;outline:none;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
+.qty-input::-webkit-inner-spin-button,.qty-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.qty-input:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(45,110,245,0.1)}
+.qty-input.has-val{border-color:var(--blue);background:white}
+.unit-toggle{display:inline-flex;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;flex:1}
+.unit-toggle button{flex:1;height:40px;font-size:13px;font-weight:500;font-family:var(--font);border:none;background:white;color:var(--gray-400);cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.unit-toggle button+button{border-left:1.5px solid var(--gray-200)}
+.unit-toggle button.sel{background:var(--blue);color:white}
+.no-results{text-align:center;padding:2rem 1rem;font-size:14px;color:var(--gray-400);display:none}
+.cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.cat-tab{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--gray-200);background:white;font-size:14px;font-weight:500;font-family:var(--font);color:var(--gray-600);cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.cat-tab:active{transform:scale(0.97)}
+.cat-tab.active{border-color:var(--blue);background:var(--accent);color:var(--blue)}
+.cat-tab .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.total-bar{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem}
+.total-bar span{font-size:13px;color:var(--gray-400)}
+.total-bar strong{font-size:15px;font-weight:600;color:var(--navy)}
+.btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;gap:10px}
+.btn{height:var(--touch);padding:0 20px;border-radius:var(--radius-sm);font-size:15px;font-weight:500;font-family:var(--font);cursor:pointer;border:1.5px solid var(--gray-200);background:white;color:var(--gray-600);display:inline-flex;align-items:center;gap:8px;transition:all 0.15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.btn-primary{background:var(--blue);color:white;border-color:var(--blue)}
+.btn-success{background:var(--success);color:white;border-color:var(--success);flex:1;justify-content:center}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+.btn:active{transform:scale(0.97)}
+.success-screen{display:none}.success-screen.active{display:block}
+.success-icon{width:64px;height:64px;border-radius:50%;background:var(--success-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.success-icon svg{width:28px;height:28px}
+.success-title{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--navy);margin-bottom:6px;text-align:center}
+.success-sub{font-size:13px;color:var(--gray-400);margin-bottom:1.5rem;text-align:center}
+.send-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 20px;height:52px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:600;font-family:var(--font);cursor:pointer;margin-bottom:10px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s}
+.send-btn:disabled{opacity:0.6;cursor:not-allowed}
+.send-btn svg{width:18px;height:18px}
+.send-btn:active{transform:scale(0.98)}
+.btn-reset{width:100%;height:var(--touch);background:white;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:14px;font-weight:500;font-family:var(--font);color:var(--gray-600);cursor:pointer;touch-action:manipulation;margin-top:10px}
+.status-box{border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;display:flex;align-items:center;gap:10px;margin-bottom:1rem;text-align:left}
+.status-box.sending{background:#fef3c7;border:1px solid #fcd34d;color:#92400e}
+.status-box.sent{background:var(--success-bg);border:1px solid #6ee7b7;color:var(--success)}
+.status-box.error{background:var(--danger-bg);border:1px solid #fca5a5;color:var(--danger)}
+.spinner{width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14l-5-5 1.4-1.4L12 14.2l7.6-7.6L21 8l-9 9z"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">Zamówienia ZRM</div>
+      <div class="logo-sub">Leki i materiały</div>
+    </div>
+  </div>
+  <div class="header-date" id="headerDate"></div>
+</header>
+
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step active" id="step1"><div class="step-num" id="sn1">1</div><span class="step-label">ZRM</span></div>
+    <div class="step" id="step2"><div class="step-num" id="sn2">2</div><span class="step-label">Asortyment</span></div>
+    <div class="step" id="step3"><div class="step-num" id="sn3">3</div><span class="step-label">Zamawiający</span></div>
+  </div>
+</div>
+
+<main>
+  <div class="form-card">
+
+    <!-- KROK 1 -->
+    <div id="s1" class="section active">
+      <div class="card-header"><h2>Miejsce dostawy</h2><p>Wybierz lokalizację ZRM.</p></div>
+      <div class="card-body">
+        <div class="field" id="f-loc">
+          <label for="loc">Lokalizacja ZRM</label>
+          <select id="loc" onchange="onLoc()">
+            <option value="">— wybierz ZRM —</option>
+            <option value="K02 21|Nowy Sącz">K02 21 — Nowy Sącz</option>
+            <option value="K02 27|Krynica">K02 27 — Krynica</option>
+            <option value="K02 44|Nowy Sącz">K02 44 — Nowy Sącz</option>
+            <option value="K02 46|Nawojowa">K02 46 — Nawojowa</option>
+            <option value="K02 48|Rytro">K02 48 — Rytro</option>
+            <option value="K02 50|Nowy Sącz">K02 50 — Nowy Sącz</option>
+            <option value="K02 52|Krynica">K02 52 — Krynica</option>
+            <option value="K02 54|Grybów">K02 54 — Grybów</option>
+            <option value="K02 56|Łososina Dolna">K02 56 — Łososina Dolna</option>
+            <option value="K02 58|Korzenna">K02 58 — Korzenna</option>
+            <option value="K02 60|Łącko">K02 60 — Łącko</option>
+            <option value="K02 64|Piwniczna">K02 64 — Piwniczna</option>
+            <option value="K02 84|Stary Sącz">K02 84 — Stary Sącz</option>
+            <option value="K02 86|Stary Sącz">K02 86 — Stary Sącz</option>
+            <option value="K02 90|Nowy Sącz">K02 90 — Nowy Sącz</option>
+            <option value="K02 98|Nowy Sącz">K02 98 — Nowy Sącz</option>
+          </select>
+          <div class="err-msg">Wybierz lokalizację ZRM.</div>
+        </div>
+        <div class="zrm-card" id="zrmCard">
+          <div class="zrm-pill" id="zrmKod"></div>
+          <div class="zrm-city" id="zrmCity"></div>
+        </div>
+        <div class="btn-row">
+          <div></div>
+          <button class="btn btn-primary" onclick="goTo(2)">Dalej <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KROK 2 -->
+    <div id="s2" class="section">
+      <div class="card-header"><h2>Wybierz asortyment</h2><p>Wpisz ilość przy każdym produkcie.</p></div>
+      <div class="card-body">
+        <div class="field" style="margin-bottom:1rem;">
+          <label>Rodzaj asortymentu</label>
+          <div class="cat-tabs">
+            <button class="cat-tab active" id="tab-leki" onclick="setCategory('leki')"><span class="cat-dot" style="background:#1e54b7"></span>Leki</button>
+            <button class="cat-tab" id="tab-opatrunki" onclick="setCategory('opatrunki')"><span class="cat-dot" style="background:#0d7a55"></span>Opatrunki</button>
+            <button class="cat-tab" id="tab-wyroby" onclick="setCategory('wyroby')"><span class="cat-dot" style="background:#7c3aed"></span>Wyroby medyczne</button>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input type="search" id="searchInput" placeholder="Szukaj..." oninput="filterProducts()" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="prod-list" id="prodList"></div>
+        <div class="no-results" id="noResults">Brak wyników.</div>
+        <div class="total-bar"><span>Wybrane pozycje</span><strong id="totalCount">0 produktów</strong></div>
+        <div class="btn-row">
+          <button class="btn" onclick="goTo(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Wstecz</button>
+          <button class="btn btn-primary" onclick="goTo(3)">Dalej <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KROK 3 -->
+    <div id="s3" class="section">
+      <div class="card-header"><h2>Dane zamawiającego</h2><p>Uzupełnij dane i datę zamówienia.</p></div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="field" id="f-fn"><label for="fn">Imię</label><input type="text" id="fn" placeholder="Anna" autocomplete="given-name"><div class="err-msg">Wpisz imię.</div></div>
+          <div class="field" id="f-ln"><label for="ln">Nazwisko</label><input type="text" id="ln" placeholder="Kowalska" autocomplete="family-name"><div class="err-msg">Wpisz nazwisko.</div></div>
+        </div>
+        <div class="field" id="f-pos"><label for="pos">Stanowisko</label><input type="text" id="pos" placeholder="Ratownik medyczny"><div class="err-msg">Wpisz stanowisko.</div></div>
+        <div class="field" id="f-dt"><label for="dt">Data zamówienia</label><input type="date" id="dt"><div class="err-msg">Wybierz datę.</div></div>
+        <div class="btn-row">
+          <button class="btn" onclick="goTo(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Wstecz</button>
+          <button class="btn btn-success" onclick="submitOrder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Zamów</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- POTWIERDZENIE -->
+    <div id="sOk" class="success-screen">
+      <div class="card-body" style="text-align:center">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0d7a55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">Zamówienie gotowe</div>
+        <div class="success-sub">Kliknij poniżej, aby wysłać zamówienie do koordynatora.</div>
+        <div id="statusBox" style="display:none" class="status-box"></div>
+        <button class="send-btn" id="sendBtn" onclick="sendEmail()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+          Wyślij zamówienie
+        </button>
+        <button class="btn-reset" onclick="resetForm()">Złóż kolejne zamówienie</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// =============================================
+// KONFIGURACJA — zmień przed wgraniem na serwer
+// =============================================
+const SEND_URL  = 'send.php';          // ścieżka do skryptu PHP
+const SECRET_KEY = 'zmien_na_dowolny_tajny_klucz'; // musi być taki sam jak w send.php
+// =============================================
+
+const allProducts = {
+  leki: [
+    {id:'p01',name:'Adenozyna',kod:'ADEN'},{id:'p02',name:'Adrenalina',kod:'ADRE'},
+    {id:'p03',name:'Amiodaron',kod:'AMIO'},{id:'p04',name:'Atropina',kod:'ATRO'},
+    {id:'p05',name:'Budezonid',kod:'BUDE'},{id:'p06',name:'Deksametazon',kod:'DEKS'},
+    {id:'p07',name:'Diazepam',kod:'DIAZ'},{id:'p08',name:'Drotaweryna',kod:'DROTA'},
+    {id:'p09',name:'Fentanyl',kod:'FENT'},{id:'p10',name:'Flumazenil',kod:'FLUM'},
+    {id:'p11',name:'Furosemid',kod:'FURO'},{id:'p12',name:'Glukagon',kod:'GLUK'},
+    {id:'p13',name:'Glukoza 20%',kod:'GLU20'},{id:'p14',name:'Glukoza 5%',kod:'GLU5'},
+    {id:'p15',name:'Heparyna',kod:'HEPA'},{id:'p16',name:'Hydrokortyzon',kod:'HYKO'},
+    {id:'p17',name:'Hydroksyetyloskrobia',kod:'HES'},{id:'p18',name:'Hydroksyzyna',kod:'HYDR'},
+    {id:'p19',name:'Ibuprofen',kod:'IBUP'},{id:'p20',name:'Izosorbid monoazotanu',kod:'IZOS'},
+    {id:'p21',name:'Kaptopryl',kod:'KAPT'},{id:'p22',name:'Ketoprofen',kod:'KETO'},
+    {id:'p23',name:'Klemastyna',kod:'KLEM'},{id:'p24',name:'Klonazepam',kod:'KLON'},
+    {id:'p25',name:'Klopidogrel',kod:'KLOP'},{id:'p26',name:'Kwas acetylosalicylowy',kod:'ASA'},
+    {id:'p27',name:'Kwas transeksamowy',kod:'TXA'},{id:'p28',name:'Lidokaina',kod:'LIDO'},
+    {id:'p29',name:'Magnez',kod:'MG'},{id:'p30',name:'Mannitol 15%',kod:'MANN'},
+    {id:'p31',name:'Metamizol',kod:'META'},{id:'p32',name:'Metoklopramid',kod:'METO'},
+    {id:'p33',name:'Metoprolol',kod:'METP'},{id:'p34',name:'Midazolam',kod:'MIDA'},
+    {id:'p35',name:'Morfina',kod:'MORF'},{id:'p36',name:'Nalokson',kod:'NALO'},
+    {id:'p37',name:'Nitrogliceryna',kod:'NITR'},{id:'p38',name:'Noradrenalina',kod:'NORA'},
+    {id:'p39',name:'Papaweryna',kod:'PAPA'},{id:'p40',name:'Paracetamol',kod:'PARA'},
+    {id:'p41',name:'Płyn fizjologiczny wieloelektrolitowy izotoniczny',kod:'PLWI'},
+    {id:'p42',name:'Prasugrel',kod:'PRAS'},{id:'p43',name:'Roztwór Ringera',kod:'RING'},
+    {id:'p44',name:'Salbutamol',kod:'SALB'},{id:'p45',name:'Sól fizjologiczna 0,9%',kod:'SF09'},
+    {id:'p46',name:'Thiethylperazinum',kod:'THIE'},{id:'p47',name:'Tikagrelor',kod:'TIKA'},
+    {id:'p48',name:'Tlen medyczny',kod:'TLEN'},{id:'p49',name:'Urapidyl',kod:'URAP'},
+    {id:'p50',name:'Wodorowęglan sodu 8,4%',kod:'WODO'},
+  ],
+  opatrunki: [
+    {id:'o01',name:'Gaza jałowa 1m²',kod:'GAZ-1M'},{id:'o02',name:'Bandaż elastyczny 10cm',kod:'BAN-10'},
+    {id:'o03',name:'Plaster z opatrunkiem',kod:'PLA-OPA'},{id:'o04',name:'Opatrunek hemostatyczny',kod:'OPA-HEM'},
+    {id:'o05',name:'Chusta trójkątna',kod:'CHU-TRO'},{id:'o06',name:'Kompresy gazowe 10x10',kod:'KOM-10'},
+    {id:'o07',name:'Folia termiczna NRC',kod:'FOL-NRC'},{id:'o08',name:'Opaska uciskowa (staza)',kod:'STA-UCI'},
+  ],
+  wyroby: [
+    {id:'w01',name:'Rurka ustno-gardłowa (Guedel)',kod:'RUG-GUE'},{id:'w02',name:'Maska twarzowa do wentylacji',kod:'MAS-WEN'},
+    {id:'w03',name:'Zestaw do wkłucia obwodowego',kod:'WKL-OBW'},{id:'w04',name:'Strzykawka 10ml',kod:'STR-10'},
+    {id:'w05',name:'Igła iniekcyjna 21G',kod:'IGL-21'},{id:'w06',name:'Elektrody EKG jednorazowe',kod:'EKG-ELE'},
+    {id:'w07',name:'Pulsoksymetr jednorazowy',kod:'PUL-JED'},{id:'w08',name:'Rękawice diagnostyczne (S/M/L)',kod:'REK-DIA'},
+    {id:'w09',name:'Kołnierz ortopedyczny',kod:'KOL-ORT'},{id:'w10',name:'Deska ortopedyczna',kod:'DES-ORT'},
+  ]
+};
+
+const catMeta = {
+  leki:      {label:'Leki',           bg:'#dbeafe',color:'#1e40af'},
+  opatrunki: {label:'Opatrunki',      bg:'#d1fae5',color:'#065f46'},
+  wyroby:    {label:'Wyrób medyczny', bg:'#ede9fe',color:'#5b21b6'},
+};
+
+let currentCategory = 'leki';
+let products = allProducts.leki;
+let unitState = {};
+let csvData = '';
+
+document.getElementById('headerDate').textContent = new Date().toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'});
+document.getElementById('dt').value = new Date().toISOString().split('T')[0];
+
+function setCategory(cat) {
+  currentCategory = cat;
+  products = allProducts[cat];
+  ['leki','opatrunki','wyroby'].forEach(k => document.getElementById('tab-'+k).classList.toggle('active', k===cat));
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchInput').placeholder = cat==='leki'?'Szukaj leku...':cat==='opatrunki'?'Szukaj opatrunku...':'Szukaj wyrobu...';
+  buildList();
+}
+
+function buildList() {
+  const list = document.getElementById('prodList');
+  list.innerHTML = '';
+  const cs = catMeta[currentCategory];
+  products.forEach(p => {
+    unitState[p.id] = unitState[p.id] || 'szt';
+    const div = document.createElement('div');
+    div.className = 'prod-card';
+    div.setAttribute('data-name', p.name.toLowerCase());
+    div.id = 'card-'+p.id;
+    const savedQty = document.getElementById('q-'+p.id) ? (document.getElementById('q-'+p.id).value||'') : '';
+    const hasSel = parseInt(savedQty) > 0;
+    if(hasSel) div.classList.add('selected');
+    div.innerHTML = `
+      <div class="prod-card-top">
+        <div>
+          <div class="prod-name">${p.name}</div>
+          <span class="prod-cat" style="background:${cs.bg};color:${cs.color}">${cs.label}</span>
+        </div>
+        <div id="rs-${p.id}" style="font-size:13px;font-weight:500;color:var(--blue);white-space:nowrap">${hasSel?savedQty+' '+(unitState[p.id]==='opk'?'opak.':'szt.'):''}</div>
+      </div>
+      <div class="prod-card-bottom">
+        <input type="number" class="qty-input${hasSel?' has-val':''}" id="q-${p.id}" min="0" placeholder="0" value="${savedQty}" inputmode="numeric" pattern="[0-9]*" oninput="onQty('${p.id}')">
+        <div class="unit-toggle">
+          <button class="${unitState[p.id]==='szt'?'sel':''}" id="us-${p.id}" onclick="setUnit('${p.id}','szt')">Sztuka</button>
+          <button class="${unitState[p.id]==='opk'?'sel':''}" id="uo-${p.id}" onclick="setUnit('${p.id}','opk')">Opakowanie</button>
+        </div>
+      </div>`;
+    list.appendChild(div);
+  });
+  updateTotal();
+}
+
+function filterProducts() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  let visible = 0;
+  products.forEach(p => {
+    const card = document.getElementById('card-'+p.id);
+    if(!card) return;
+    const match = !q || p.name.toLowerCase().includes(q);
+    card.classList.toggle('hidden-row', !match);
+    if(match) visible++;
+  });
+  document.getElementById('noResults').style.display = visible===0?'block':'none';
+}
+
+function setUnit(id, u) {
+  unitState[id] = u;
+  document.getElementById('us-'+id).classList.toggle('sel', u==='szt');
+  document.getElementById('uo-'+id).classList.toggle('sel', u==='opk');
+  updateRowSum(id);
+  updateTotal();
+}
+
+function onQty(id) {
+  const el = document.getElementById('q-'+id);
+  const v = parseInt(el.value)||0;
+  el.classList.toggle('has-val', v>0);
+  document.getElementById('card-'+id).classList.toggle('selected', v>0);
+  updateRowSum(id);
+  updateTotal();
+}
+
+function updateRowSum(id) {
+  const v = parseInt(document.getElementById('q-'+id).value)||0;
+  const el = document.getElementById('rs-'+id);
+  if(el) el.textContent = v>0 ? v+' '+(unitState[id]==='opk'?'opak.':'szt.') : '';
+}
+
+function updateTotal() {
+  const allP = [...allProducts.leki,...allProducts.opatrunki,...allProducts.wyroby];
+  const c = allP.filter(p=>{ const el=document.getElementById('q-'+p.id); return el&&(parseInt(el.value)||0)>0; }).length;
+  document.getElementById('totalCount').textContent = c===0?'0 produktów':c+' '+(c===1?'produkt':c<5?'produkty':'produktów');
+}
+
+function onLoc() {
+  const v = document.getElementById('loc').value;
+  document.getElementById('f-loc').classList.remove('error');
+  if(v) {
+    const [kod,city] = v.split('|');
+    document.getElementById('zrmKod').textContent = kod;
+    document.getElementById('zrmCity').textContent = city;
+    document.getElementById('zrmCard').classList.add('vis');
+  } else { document.getElementById('zrmCard').classList.remove('vis'); }
+}
+
+function goTo(step) {
+  if(step===2 && !document.getElementById('loc').value) {
+    document.getElementById('f-loc').classList.add('error'); return;
+  }
+  [1,2,3].forEach(i => {
+    document.getElementById('s'+i).classList.remove('active');
+    const sn=document.getElementById('sn'+i), st=document.getElementById('step'+i);
+    if(i<step){ sn.textContent=''; st.className='step done'; }
+    else if(i===step){ sn.textContent=String(i); st.className='step active'; }
+    else{ sn.textContent=String(i); st.className='step'; }
+  });
+  document.getElementById('s'+step).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function submitOrder() {
+  const fn=document.getElementById('fn').value.trim(), ln=document.getElementById('ln').value.trim();
+  const pos=document.getElementById('pos').value.trim(), dt=document.getElementById('dt').value;
+  let ok=true;
+  [['fn',fn,'f-fn'],['ln',ln,'f-ln'],['pos',pos,'f-pos'],['dt',dt,'f-dt']].forEach(([,v,fid])=>{
+    const el=document.getElementById(fid);
+    if(!v){el.classList.add('error');ok=false;}else el.classList.remove('error');
+  });
+  if(!ok) return;
+  const [locKod,locCity]=document.getElementById('loc').value.split('|');
+  const allP=[...allProducts.leki,...allProducts.opatrunki,...allProducts.wyroby];
+  const ordered=allP.filter(p=>{ const el=document.getElementById('q-'+p.id); return el&&(parseInt(el.value)||0)>0; });
+  const nrZam='ZAM/'+dt.replace(/-/g,'')+'/'+Math.floor(Math.random()*900+100);
+  let rows=['Numer dokumentu;Data;ZRM;Miejscowość;Zamawiający;Stanowisko;Kod towaru;Nazwa towaru;Ilość;Jednostka;Kategoria'];
+  ordered.forEach(p=>{
+    const qty=parseInt(document.getElementById('q-'+p.id).value)||0;
+    const pCat=allProducts.leki.find(x=>x.id===p.id)?'Leki':allProducts.opatrunki.find(x=>x.id===p.id)?'Opatrunki':'Wyroby medyczne';
+    rows.push([nrZam,dt,locKod,`"${locCity}"`,`"${fn} ${ln}"`,`"${pos}"`,p.kod,`"${p.name}"`,qty,unitState[p.id]==='opk'?'OPK':'SZT',`"${pCat}"`].join(';'));
+  });
+  csvData=rows.join('\r\n');
+  [1,2,3].forEach(i=>{
+    document.getElementById('s'+i).classList.remove('active');
+    document.getElementById('step'+i).className='step done';
+    document.getElementById('sn'+i).textContent='';
+  });
+  document.getElementById('sOk').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function sendEmail() {
+  const btn = document.getElementById('sendBtn');
+  const box = document.getElementById('statusBox');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Wysyłanie...';
+  box.style.display = 'flex';
+  box.className = 'status-box sending';
+  box.innerHTML = '<div class="spinner"></div> Trwa wysyłanie wiadomości...';
+
+  const fn=document.getElementById('fn').value.trim();
+  const ln=document.getElementById('ln').value.trim();
+  const dt=document.getElementById('dt').value;
+  const [locKod,locCity]=document.getElementById('loc').value.split('|');
+
+  try {
+    const res = await fetch(SEND_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        key: SECRET_KEY,
+        subject: `Zamówienie ZRM ${locKod} — ${fn} ${ln} — ${dt}`,
+        from_name: `${fn} ${ln}`,
+        zrm: `${locKod} — ${locCity}`,
+        data: dt,
+        stanowisko: document.getElementById('pos').value.trim(),
+        zamowienie: csvData,
+      })
+    });
+    const json = await res.json();
+    if(res.ok && json.status==='ok') {
+      box.className = 'status-box sent';
+      box.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Zamówienie wysłane do koordynatora!';
+      btn.style.display = 'none';
+    } else {
+      throw new Error(json.message || 'Błąd serwera');
+    }
+  } catch(err) {
+    box.className = 'status-box error';
+    box.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Błąd: ${err.message}`;
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg> Spróbuj ponownie';
+  }
+}
+
+function resetForm() {
+  document.getElementById('loc').value='';
+  document.getElementById('zrmCard').classList.remove('vis');
+  ['fn','ln','pos'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('dt').value=new Date().toISOString().split('T')[0];
+  ['f-loc','f-fn','f-ln','f-pos','f-dt'].forEach(id=>document.getElementById(id).classList.remove('error'));
+  document.getElementById('sOk').classList.remove('active');
+  document.getElementById('noResults').style.display='none';
+  document.getElementById('statusBox').style.display='none';
+  document.getElementById('sendBtn').style.display='';
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('sendBtn').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg> Wyślij zamówienie';
+  [1,2,3].forEach(i=>{document.getElementById('step'+i).className='step';document.getElementById('sn'+i).textContent=String(i);});
+ 
+  document.getElementById('step1').className='step active';
+  unitState={};
+  setCategory('leki');
+  document.getElementById('s1').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildList();
+</script>
+</body>
+</html>
