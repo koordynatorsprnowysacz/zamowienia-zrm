@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0f1f3d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Zamówienia ZRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1f3d;--navy-mid:#1a3260;--blue:#1e54b7;--blue-light:#2d6ef5;
+  --accent:#e8f0fe;--accent-strong:#c5d8ff;--success:#0d7a55;--success-bg:#e6f4ee;
+  --danger:#c0392b;--danger-bg:#fdf0ee;--gray-50:#f8f9fc;--gray-100:#eef0f6;
+  --gray-200:#dde1ed;--gray-400:#8b93a8;--gray-600:#4b556e;--gray-900:#0f1724;
+  --radius-sm:8px;--radius:12px;--radius-lg:16px;
+  --shadow:0 4px 20px rgba(15,31,61,0.10);
+  --font:'Inter',sans-serif;--font-display:'DM Sans',sans-serif;--touch:48px;
+}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+header{background:var(--navy);padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:18px;height:18px;fill:white}
+.logo-text{font-family:var(--font-display);font-size:15px;font-weight:700;color:white}
+.logo-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px}
+.header-date{font-size:11px;color:rgba(255,255,255,0.35);white-space:nowrap}
+.stepper-wrap{background:white;border-bottom:1px solid var(--gray-200);padding:0 0.5rem}
+.stepper{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;width:100%}
+.step{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:0;min-width:0}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:white;color:var(--gray-400);flex-shrink:0;transition:all 0.2s;position:relative}
+.step.active .step-num{background:var(--blue);border-color:var(--blue);color:white}
+.step.done .step-num{background:var(--success);border-color:var(--success);color:transparent}
+.step.done .step-num::after{content:'';position:absolute;left:7px;top:4px;width:5px;height:9px;border:2px solid white;border-top:none;border-left:none;transform:rotate(45deg)}
+.step-label{font-size:11px;font-weight:500;color:var(--gray-400);white-space:nowrap;text-decoration:none;font-style:normal}
+.step.active .step-label{color:var(--blue)}
+.step.done .step-label{color:var(--success)}
+@media(max-width:360px){.step-label{font-size:10px}} @media(max-width:300px){.step-label{display:none}}
+main{flex:1;padding:1rem 0.75rem 2rem}
+.form-card{max-width:720px;margin:0 auto;background:white;border-radius:var(--radius-lg);box-shadow:var(--shadow);border:1px solid var(--gray-200);overflow:hidden}
+.card-header{padding:1.25rem 1.25rem 1rem;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%)}
+.card-header h2{font-family:var(--font-display);font-size:18px;font-weight:700;color:white;margin-bottom:3px}
+.card-header p{font-size:13px;color:rgba(255,255,255,0.55)}
+.card-body{padding:1.25rem}
+.section{display:none}.section.active{display:block}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--gray-600);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+.field select,.field input[type=text],.field input[type=date]{width:100%;height:var(--touch);padding:0 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;font-family:var(--font);color:var(--gray-900);background:white;outline:none;appearance:none;-webkit-appearance:none;transition:border-color 0.15s,box-shadow 0.15s}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b93a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+.field select:focus,.field input:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(45,110,245,0.12)}
+.field.error select,.field.error input{border-color:var(--danger);background:var(--danger-bg)}
+.field .err-msg{font-size:12px;color:var(--danger);margin-top:5px;display:none}
+.field.error .err-msg{display:block}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.grid-2{grid-template-columns:1fr}}
+.zrm-card{background:var(--accent);border:1px solid var(--accent-strong);border-radius:var(--radius-sm);padding:12px 14px;margin-top:8px;margin-bottom:1rem;display:none;align-items:center;gap:10px}
+.zrm-card.vis{display:flex}
+.zrm-pill{background:var(--blue);color:white;font-size:13px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap}
+.zrm-city{font-size:14px;color:var(--navy);font-weight:500}
+.search-wrap{position:relative;margin-bottom:12px}
+.search-wrap input{width:100%;height:44px;padding:0 14px 0 40px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:15px;font-family:var(--font);color:var(--gray-900);background:var(--gray-50);outline:none;-webkit-appearance:none;appearance:none}
+.search-wrap input:focus{border-color:var(--blue-light);background:white;box-shadow:0 0 0 3px rgba(45,110,245,0.08)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);pointer-events:none}
+.search-icon svg{width:16px;height:16px}
+.prod-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.prod-card{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;transition:border-color 0.15s}
+.prod-card.selected{border-color:var(--blue);background:var(--accent)}
+.prod-card.hidden-row{display:none}
+.prod-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.prod-name{font-size:14px;font-weight:500;color:var(--gray-900);line-height:1.3}
+.prod-cat{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:3px;text-transform:uppercase;letter-spacing:0.3px}
+.prod-card-bottom{display:flex;align-items:center;gap:10px}
+.qty-input{width:72px;height:40px;text-align:center;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;font-weight:500;font-family:var(--font);color:var(--gray-900);background:white;outline:none;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
+.qty-input::-webkit-inner-spin-button,.qty-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.qty-input:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(45,110,245,0.1)}
+.qty-input.has-val{border-color:var(--blue);background:white}
+.unit-toggle{display:inline-flex;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;flex:1}
+.unit-toggle button{flex:1;height:40px;font-size:13px;font-weight:500;font-family:var(--font);border:none;background:white;color:var(--gray-400);cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.unit-toggle button+button{border-left:1.5px solid var(--gray-200)}
+.unit-toggle button.sel{background:var(--blue);color:white}
+.no-results{text-align:center;padding:2rem 1rem;font-size:14px;color:var(--gray-400);display:none}
+.cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+.cat-tab{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--gray-200);background:white;font-size:14px;font-weight:500;font-family:var(--font);color:var(--gray-600);cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.cat-tab:active{transform:scale(0.97)}
+.cat-tab.active{border-color:var(--blue);background:var(--accent);color:var(--blue)}
+.cat-tab .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.total-bar{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem}
+.total-bar span{font-size:13px;color:var(--gray-400)}
+.total-bar strong{font-size:15px;font-weight:600;color:var(--navy)}
+.btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;gap:10px}
+.btn{height:var(--touch);padding:0 20px;border-radius:var(--radius-sm);font-size:15px;font-weight:500;font-family:var(--font);cursor:pointer;border:1.5px solid var(--gray-200);background:white;color:var(--gray-600);display:inline-flex;align-items:center;gap:8px;transition:all 0.15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.btn-primary{background:var(--blue);color:white;border-color:var(--blue)}
+.btn-success{background:var(--success);color:white;border-color:var(--success);flex:1;justify-content:center}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+.btn:active{transform:scale(0.97)}
+.success-screen{display:none}.success-screen.active{display:block}
+.success-icon{width:64px;height:64px;border-radius:50%;background:var(--success-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.success-icon svg{width:28px;height:28px}
+.success-title{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--navy);margin-bottom:6px;text-align:center}
+.success-sub{font-size:13px;color:var(--gray-400);margin-bottom:1.5rem;text-align:center}
+.send-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 20px;height:52px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:600;font-family:var(--font);cursor:pointer;margin-bottom:10px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:opacity 0.2s}
+.send-btn:disabled{opacity:0.6;cursor:not-allowed}
+.send-btn svg{width:18px;height:18px}
+.send-btn:active{transform:scale(0.98)}
+.btn-reset{width:100%;height:var(--touch);background:white;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:14px;font-weight:500;font-family:var(--font);color:var(--gray-600);cursor:pointer;touch-action:manipulation;margin-top:10px}
+.status-box{border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;display:flex;align-items:center;gap:10px;margin-bottom:1rem;text-align:left}
+.status-box.sending{background:#fef3c7;border:1px solid #fcd34d;color:#92400e}
+.status-box.sent{background:var(--success-bg);border:1px solid #6ee7b7;color:var(--success)}
+.status-box.error{background:var(--danger-bg);border:1px solid #fca5a5;color:var(--danger)}
+.spinner{width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14l-5-5 1.4-1.4L12 14.2l7.6-7.6L21 8l-9 9z"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">Zamówienia ZRM</div>
+      <div class="logo-sub">Leki i materiały</div>
+    </div>
+  </div>
+  <div class="header-date" id="headerDate"></div>
+</header>
+
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step active" id="step1"><div class="step-num" id="sn1">1</div><span class="step-label">ZRM</span></div>
+    <div class="step" id="step2"><div class="step-num" id="sn2">2</div><span class="step-label">Asortyment</span></div>
+    <div class="step" id="step3"><div class="step-num" id="sn3">3</div><span class="step-label">Zamawiający</span></div>
+  </div>
+</div>
+
+<main>
+  <div class="form-card">
+
+    <!-- KROK 1 -->
+    <div id="s1" class="section active">
+      <div class="card-header"><h2>Miejsce dostawy</h2><p>Wybierz lokalizację ZRM.</p></div>
+      <div class="card-body">
+        <div class="field" id="f-loc">
+          <label for="loc">Lokalizacja ZRM</label>
+          <select id="loc" onchange="onLoc()">
+            <option value="">— wybierz ZRM —</option>
+            <option value="K02 21|Nowy Sącz">K02 21 — Nowy Sącz</option>
+            <option value="K02 27|Krynica">K02 27 — Krynica</option>
+            <option value="K02 44|Nowy Sącz">K02 44 — Nowy Sącz</option>
+            <option value="K02 46|Nawojowa">K02 46 — Nawojowa</option>
+            <option value="K02 48|Rytro">K02 48 — Rytro</option>
+            <option value="K02 50|Nowy Sącz">K02 50 — Nowy Sącz</option>
+            <option value="K02 52|Krynica">K02 52 — Krynica</option>
+            <option value="K02 54|Grybów">K02 54 — Grybów</option>
+            <option value="K02 56|Łososina Dolna">K02 56 — Łososina Dolna</option>
+            <option value="K02 58|Korzenna">K02 58 — Korzenna</option>
+            <option value="K02 60|Łącko">K02 60 — Łącko</option>
+            <option value="K02 64|Piwniczna">K02 64 — Piwniczna</option>
+            <option value="K02 84|Stary Sącz">K02 84 — Stary Sącz</option>
+            <option value="K02 86|Stary Sącz">K02 86 — Stary Sącz</option>
+            <option value="K02 90|Nowy Sącz">K02 90 — Nowy Sącz</option>
+            <option value="K02 98|Nowy Sącz">K02 98 — Nowy Sącz</option>
+          </select>
+          <div class="err-msg">Wybierz lokalizację ZRM.</div>
+        </div>
+        <div class="zrm-card" id="zrmCard">
+          <div class="zrm-pill" id="zrmKod"></div>
+          <div class="zrm-city" id="zrmCity"></div>
+        </div>
+        <div class="btn-row">
+          <div></div>
+          <button class="btn btn-primary" onclick="goTo(2)">Dalej <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KROK 2 -->
+    <div id="s2" class="section">
+      <div class="card-header"><h2>Wybierz asortyment</h2><p>Wpisz ilość przy każdym produkcie.</p></div>
+      <div class="card-body">
+        <div class="field" style="margin-bottom:1rem;">
+          <label>Rodzaj asortymentu</label>
+          <div class="cat-tabs">
+            <button class="cat-tab active" id="tab-leki" onclick="setCategory('leki')"><span class="cat-dot" style="background:#1e54b7"></span>Leki</button>
+            <button class="cat-tab" id="tab-opatrunki" onclick="setCategory('opatrunki')"><span class="cat-dot" style="background:#0d7a55"></span>Opatrunki</button>
+            <button class="cat-tab" id="tab-wyroby" onclick="setCategory('wyroby')"><span class="cat-dot" style="background:#7c3aed"></span>Wyroby medyczne</button>
+            <button class="cat-tab" id="tab-dezynfekcja" onclick="setCategory('dezynfekcja')"><span class="cat-dot" style="background:#b45309"></span>Środki dezynfekcyjne</button>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input type="search" id="searchInput" placeholder="Szukaj..." oninput="filterProducts()" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="prod-list" id="prodList"></div>
+        <div class="no-results" id="noResults">Brak wyników.</div>
+        <div class="total-bar"><span>Wybrane pozycje</span><strong id="totalCount">0 produktów</strong></div>
+        <div class="btn-row">
+          <button class="btn" onclick="goTo(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Wstecz</button>
+          <button class="btn btn-primary" onclick="goTo(3)">Dalej <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KROK 3 -->
+    <div id="s3" class="section">
+      <div class="card-header"><h2>Dane zamawiającego</h2><p>Uzupełnij dane i datę zamówienia.</p></div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="field" id="f-fn"><label for="fn">Imię</label><input type="text" id="fn" placeholder="Anna" autocomplete="given-name"><div class="err-msg">Wpisz imię.</div></div>
+          <div class="field" id="f-ln"><label for="ln">Nazwisko</label><input type="text" id="ln" placeholder="Kowalska" autocomplete="family-name"><div class="err-msg">Wpisz nazwisko.</div></div>
+        </div>
+        <div class="field" id="f-pos"><label for="pos">Stanowisko</label><input type="text" id="pos" placeholder="Ratownik medyczny"><div class="err-msg">Wpisz stanowisko.</div></div>
+        <div class="field" id="f-dt"><label for="dt">Data zamówienia</label><input type="date" id="dt"><div class="err-msg">Wybierz datę.</div></div>
+        <div class="btn-row">
+          <button class="btn" onclick="goTo(2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Wstecz</button>
+          <button class="btn btn-success" onclick="submitOrder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Zamów</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- POTWIERDZENIE -->
+    <div id="sOk" class="success-screen">
+      <div class="card-body" style="text-align:center">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0d7a55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">Zamówienie gotowe</div>
+        <div class="success-sub">Kliknij poniżej, aby wysłać zamówienie do koordynatora.</div>
+        <div id="statusBox" style="display:none" class="status-box"></div>
+        <button class="send-btn" id="sendBtn" onclick="sendEmail()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+          Wyślij zamówienie
+        </button>
+        <button class="btn-reset" onclick="resetForm()">Złóż kolejne zamówienie</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// =============================================
+// KONFIGURACJA — zmień przed wgraniem na serwer
+// =============================================
+const SEND_URL  = 'send.php';          // ścieżka do skryptu PHP
+const SECRET_KEY = 'zmien_na_dowolny_tajny_klucz'; // musi być taki sam jak w send.php
+// =============================================
+
+const allProducts = {
+    leki: [
+    {id:'p001',name:'Adenocor 6mg/2ml (6amp.-op.)',kod:'100-001-0'},
+    {id:'p002',name:'Adrenalina 1mg/ml (10amp.-op.)',kod:'100-002-0'},
+    {id:'p003',name:'Amiokordin/Cordarone 50mg/3ml (6amp.-op.)',kod:'100-003-0'},
+    {id:'p004',name:'Aldan 10mg (30tabl.-op.)',kod:'100-004-0'},
+    {id:'p005',name:'Pegorel',kod:'100-005-0'},
+    {id:'p006',name:'Atropinum 1mg/ml (10amp.-op.)',kod:'100-006-0'},
+    {id:'p007',name:'Betaloc 5mg/5ml (5amp.-op.)',kod:'100-007-0'},
+    {id:'p008',name:'Buscolysin 20mg/ml (10amp.-op.)',kod:'100-008-0'},
+    {id:'p009',name:'Hydroxyzinum 50mg/ml (5amp.-op.)',kod:'100-009-0'},
+    {id:'p010',name:'Captopril 12,5mg (30tabl.-op.)',kod:'100-010-0'},
+    {id:'p011',name:'Captopril 25mg (30tabl.-op.)',kod:'100-011-0'},
+    {id:'p012',name:'Clemastinum 2mg/2ml (5amp.-op.)',kod:'100-012-0'},
+    {id:'p013',name:'Corhydron 100mg (5fiol.-op.)',kod:'100-013-0'},
+    {id:'p014',name:'Cyclonamine 250mg/2ml (5amp.-op.)',kod:'100-014-0'},
+    {id:'p015',name:'Dekstran 40.000 500ml',kod:'100-015-0'},
+    {id:'p016',name:'Dekstran 40.000 250ml',kod:'100-016-0'},
+    {id:'p017',name:'Torecan 6.5mg/ml (5amp.-op.)',kod:'100-017-0'},
+    {id:'p018',name:'Dexaven 4mg/ml (10amp.-op.)',kod:'100-018-0'},
+    {id:'p019',name:'Dexaven 8mg/2ml (10amp.-op.)',kod:'100-019-0'},
+    {id:'p020',name:'Dopaminum 1% 50mg/5ml (10amp.-op.)',kod:'100-020-0'},
+    {id:'p021',name:'Dopaminum 4% 200mg/5ml (10amp.-op.)',kod:'100-021-0'},
+    {id:'p022',name:'Tachyben/Ebrantil 25mg/5ml (5amp.-op.)',kod:'100-022-0'},
+    {id:'p023',name:'Fenactil 25mg/5ml (5amp.-op.)',kod:'100-023-0'},
+    {id:'p024',name:'Flumazenil 0.1mg/5ml (5amp.-op.)',kod:'100-024-0'},
+    {id:'p025',name:'Furosemidum 20mg/2ml (50amp.-op.)',kod:'100-025-0'},
+    {id:'p026',name:'Gensulin R 100j.m/3ml (5wkładów-op.)',kod:'100-026-0'},
+    {id:'p027',name:'GlucaGen 1mg (1fiol.-op.)',kod:'100-027-0'},
+    {id:'p028',name:'Glucosum 20% 250ml butelka',kod:'100-028-0'},
+    {id:'p029',name:'Glucosum 20% (5amp.)',kod:'100-029-0'},
+    {id:'p030',name:'Glucosum 5% 250ml worek',kod:'100-030-0'},
+    {id:'p031',name:'Glucosum 5% 500ml worek',kod:'100-031-0'},
+    {id:'p032',name:'Heparinum 25.000j.m/5ml (10fiol.-op.)',kod:'100-032-0'},
+    {id:'p033',name:'Hydroxyzinum 10mg (30tabl.-op.)',kod:'100-033-0'},
+    {id:'p034',name:'Hydroxyzinum 25mg (30tabl.-op.)',kod:'100-034-0'},
+    {id:'p035',name:'Kalium Chloratum 15% 20ml (10fiol.-op.)',kod:'100-035-0'},
+    {id:'p036',name:'Ibuprofen 200mg (60tabl.-op.)',kod:'100-036-0'},
+    {id:'p037',name:'Ketonal Activ',kod:'100-037-0'},
+    {id:'p038',name:'Ketonal 100mg/2ml (10amp.-op.)',kod:'100-038-0'},
+    {id:'p039',name:'Ketoprofen',kod:'100-039-0'},
+    {id:'p040',name:'Ketalar 10mg/1ml (5fiol.20ml)',kod:'100-040-0'},
+    {id:'p041',name:'Lignocaina typ A 30g żel',kod:'100-041-0'},
+    {id:'p042',name:'Lignocainum 20ml (5fiol.-op.)',kod:'100-042-0'},
+    {id:'p043',name:'Lignocaina typ U 30g żel',kod:'100-043-0'},
+    {id:'p044',name:'Magnesium Sulf 10ml (10amp.-op.)',kod:'100-044-0'},
+    {id:'p045',name:'Mannitol 200mg/100ml butelka',kod:'100-045-0'},
+    {id:'p046',name:'Metoclopramidum 10mg/2ml (5amp.-op.)',kod:'100-046-0'},
+    {id:'p047',name:'Metocard 50mg (30tabl.-op.)',kod:'100-047-0'},
+    {id:'p048',name:'NaCl 0,9% 100ml worek',kod:'100-048-0'},
+    {id:'p049',name:'NaCl 0,9% 10ml (100amp.-op.)',kod:'100-049-0'},
+    {id:'p050',name:'NaCl 0,9% 250ml worek',kod:'100-050-0'},
+    {id:'p051',name:'NaCl 0,9% 500ml worek',kod:'100-051-0'},
+    {id:'p052',name:'Naloxonum 0.4mg/ml (10amp.-op.)',kod:'100-052-0'},
+    {id:'p053',name:'Natr. Bicarbonic 8,4% 20ml (10amp.-op.)',kod:'100-053-0'},
+    {id:'p054',name:'Nitromit 0.4mg aerosol',kod:'100-054-0'},
+    {id:'p055',name:'No-Spa 40mg/2ml (5amp.-op.)',kod:'100-055-0'},
+    {id:'p056',name:'Ondansetron',kod:'100-056-0'},
+    {id:'p057',name:'Oxytocin 5j.m./ml (5amp.-op.)',kod:'100-057-0'},
+    {id:'p058',name:'Papaverinum 20mg/2ml (10amp.-op.)',kod:'100-058-0'},
+    {id:'p059',name:'Paracetamol 125mg czopki (10szt.-op.)',kod:'100-059-0'},
+    {id:'p060',name:'Paracetamol 250mg czopki (10szt.-op.)',kod:'100-060-0'},
+    {id:'p061',name:'Paracetamol 500mg czopki (10szt.-op.)',kod:'100-061-0'},
+    {id:'p062',name:'Paracetamol 50ml fiolka (10fiol.-op.)',kod:'100-062-0'},
+    {id:'p063',name:'Polopiryna S 300mg (20szt.-op.)',kod:'100-063-0'},
+    {id:'p064',name:'Phenazolinum 100mg/2ml (10amp.-op.)',kod:'100-064-0'},
+    {id:'p065',name:'Poltram 100',kod:'100-065-0'},
+    {id:'p066',name:'Poltram 50mg/ml (5amp.-op.)',kod:'100-066-0'},
+    {id:'p067',name:'Pulmicort 0,125mg/2ml (20poj.-op.)',kod:'100-067-0'},
+    {id:'p068',name:'Pulmicort/Budixon/Nebbud 0,25mg/2ml (20poj.-op.)',kod:'100-068-0'},
+    {id:'p069',name:'Optylite/PWE 250ml worek',kod:'100-069-0'},
+    {id:'p070',name:'Optylite/PWE 500ml worek',kod:'100-070-0'},
+    {id:'p071',name:'Pyralgin 1g/2ml (5amp.-op.)',kod:'100-071-0'},
+    {id:'p072',name:'Pyralgin 2,5g/5ml (5amp.-op.)',kod:'100-072-0'},
+    {id:'p073',name:'Salbutamol',kod:'100-073-0'},
+    {id:'p074',name:'Solu-Medrol 250mg (1f.+rozp.)',kod:'100-074-0'},
+    {id:'p075',name:'Solu-Medrol 1000mg (1f.+rozp.)',kod:'100-075-0'},
+    {id:'p076',name:'Theophyllinum',kod:'100-076-0'},
+    {id:'p077',name:'Trombina 400j.m. (5amp.-op.)',kod:'100-077-0'},
+    {id:'p078',name:'Theospirex 20mg/ml (5amp.-op.)',kod:'100-078-0'},
+    {id:'p079',name:'Ventolin 2,5mg/2.5ml (20poj.-op.)',kod:'100-079-0'},
+    {id:'p080',name:'Ventolin 5mg/2.5ml (20poj.-op.)',kod:'100-080-0'},
+    {id:'p081',name:'Paracetamol 50mg czopki (10szt.-op.)',kod:'100-081-0'},
+    {id:'p082',name:'Apap 500mg (24tabl.-op.)',kod:'100-082-0'},
+    {id:'p083',name:'Paracetamol 500mg tabl. (20tabl.-op.)',kod:'100-083-0'},
+    {id:'p084',name:'Chlorsuccillin 200mg (10amp.-op.)',kod:'100-084-0'},
+    {id:'p085',name:'Clonozepanum 1mg/ml (10amp.-op.)',kod:'100-085-0'},
+    {id:'p087',name:'Midanium 5mg/5ml (10amp.-op.)',kod:'100-087-0'},
+    {id:'p088',name:'Propofol 1% 10mg/ml (5fiol.-op.)',kod:'100-088-0'},
+    {id:'p089',name:'Relanium 10mg/2ml (50amp.-op.)',kod:'100-089-0'},
+    {id:'p090',name:'Relsed 10mg/2.5ml (5wlewek-op.)',kod:'100-090-0'},
+    {id:'p091',name:'Relsed 5mg/2.5ml (5wlewek-op.)',kod:'100-091-0'},
+    {id:'p092',name:'Thiopental',kod:'100-092-0'},
+    {id:'p093',name:'Fentanyl 0,1mg/2ml (50amp.-op.)',kod:'100-093-0'},
+    {id:'p094',name:'Morphini Sulfas 10mg/ml (10amp.-op.)',kod:'100-094-0'},
+    {id:'p095',name:'Propanolol',kod:'100-095-0'},
+    {id:'p096',name:'Venflon bezpieczny 26G (fioletowy)',kod:'100-096-0'},
+    {id:'p097',name:'Metocard 5mg/5ml (5amp.-op.)',kod:'100-097-0'},
+    {id:'p098',name:'Metamizole 500mg/5ml (10amp.-op.)',kod:'100-098-0'},
+    {id:'p099',name:'Paracetamol 100ml fiolka (10fiol.-op.)',kod:'100-099-0'},
+    {id:'p100',name:'Brilique 90mg (56tabl.-op.)',kod:'100-100-0'},
+    {id:'p101',name:'Hydro 50mg/ml amp. (5szt.-op.)',kod:'100-101-0'},
+    {id:'p102',name:'Metamizole 500mg/2ml 1g (10szt.-op.)',kod:'100-102-0'},
+    {id:'p103',name:'Clopidogrel 75mg (28tabl.-op.)',kod:'100-103-0'},
+    {id:'p104',name:'Droxiem 100mg/2ml (10amp.-op.)',kod:'100-104-0'},
+    {id:'p105',name:'Budixon Neb. 0,5mg/ml 2ml',kod:'100-105-0'},
+    {id:'p106',name:'Benodil 0,25mg/ml 2ml',kod:'100-106-0'},
+    {id:'p107',name:'Glucosum 20% 500ml butelka (20szt.)',kod:'100-107-0'},
+    {id:'p108',name:'Dobutamine TZF 0,25g fiol.',kod:'100-108-0'},
+    {id:'p109',name:'Exacyl/Tranitec/Tranexamic 0,1g/ml (5amp.) 5ml',kod:'100-109-0'},
+    {id:'p110',name:'Efient 10mg tabl. (28szt.)',kod:'100-110-0'},
+    {id:'p111',name:'Noradrenaline 1mg/ml (10amp.-op.)',kod:'100-111-0'},
+    {id:'p112',name:'Corhydron 25mg (5fiol.-op.)',kod:'100-112-0'},
+    {id:'p113',name:'Sterylny żel do cewnikowania 6ml',kod:'100-113-0'},
+  ],
+      opatrunki: [
+    {id:'o001',name:'Sterylny żel do cewnikowania 6ml',kod:'100-113-0'},
+    {id:'o002',name:'BurnTec/Aqua-żel 20x20 (22x28)',kod:'103-001-0'},
+    {id:'o003',name:'BurnTec 20x40',kod:'103-002-0'},
+    {id:'o004',name:'BurnTec 40x60 (na twarz)',kod:'103-003-0'},
+    {id:'o005',name:'Bandaż 4m x 10cm',kod:'103-004-0'},
+    {id:'o006',name:'Bandaż 4m x 15cm',kod:'103-005-0'},
+    {id:'o007',name:'Chusta trójkątna',kod:'103-006-0'},
+    {id:'o008',name:'Codofix r.6 (kolano, łokieć)',kod:'103-007-0'},
+    {id:'o009',name:'Codofix r.8 (głowa, udo)',kod:'103-008-0'},
+    {id:'o010',name:'Gaza sterylna 1m² (25szt.-op.)',kod:'103-009-0'},
+    {id:'o011',name:'Gazik n/jał. 7,5x7,5cm (100szt.-op.)',kod:'103-010-0'},
+    {id:'o012',name:'Gazik n/jał. 10x10cm',kod:'103-011-0'},
+    {id:'o013',name:'Gazik n/jał. 5x5cm',kod:'103-012-0'},
+    {id:'o014',name:'Koc ratunkowy',kod:'103-013-0'},
+    {id:'o015',name:'Opatrunek wentylowy Aschermana',kod:'103-014-0'},
+    {id:'o016',name:'Przylepiec Polovis 5m x 2,5cm',kod:'103-015-0'},
+    {id:'o017',name:'Przylepiec włókninowy z opatrunkiem 8cm x 1m',kod:'103-016-0'},
+    {id:'o018',name:'Seton gaz./jał. 2m x 1cm',kod:'103-017-0'},
+    {id:'o019',name:'Seton gaz./jał. 2m x 2cm',kod:'103-018-0'},
+    {id:'o020',name:'Gaza sterylna 1/2m²',kod:'103-019-0'},
+    {id:'o021',name:'Spongostan — gąbka hemostatyczna',kod:'103-020-0'},
+    {id:'o022',name:'Opaska elastyczna z zapinką 10cm x 5m',kod:'103-021-0'},
+    {id:'o023',name:'Łącznik martwa przestrzeń 15cm',kod:'103-022-0'},
+    {id:'o024',name:'Bandaż izraelski T3',kod:'103-023-0'},
+    {id:'o025',name:'Bandaż izraelski 10cm x 4,5m (T1)',kod:'103-024-0'},
+    {id:'o026',name:'Codofix nr 1 palec',kod:'103-025-0'},
+    {id:'o027',name:'Opatrunek hemostatyczny 30x30',kod:'103-026-0'},
+    {id:'o028',name:'Opatrunek hemostatyczny 7,5x3,7',kod:'103-027-0'},
+    {id:'o029',name:'Opatrunek hemostatyczny 5x5',kod:'106-046-0'},
+  ],
+      dezynfekcja: [
+    {id:'d001',name:'Gazik LEKO/Med Hygienic Duo (100szt.-op.)',kod:'106-001-0'},
+    {id:'d002',name:'Merida DDR plus 1l',kod:'106-002-0'},
+    {id:'d003',name:'Prontosan 350ml',kod:'106-003-0'},
+    {id:'d004',name:'Spirytus skażony',kod:'106-004-0'},
+    {id:'d005',name:'Woda utleniona 3% 1000g',kod:'106-005-0'},
+    {id:'d006',name:'Etaproben',kod:'106-006-0'},
+    {id:'d007',name:'Merida płyn do podłóg',kod:'106-007-0'},
+    {id:'d008',name:'Wkład duży Med Higienic',kod:'106-008-0'},
+    {id:'d009',name:'Wkład mały Med Higienic',kod:'106-009-0'},
+    {id:'d010',name:'Tuba duża Med Higienic',kod:'106-010-0'},
+    {id:'d011',name:'Tuba mała Med Higienic',kod:'106-011-0'},
+    {id:'d012',name:'Epidemin 1l',kod:'106-012-0'},
+    {id:'d013',name:'Octenisept płyn 250ml',kod:'106-035-0'},
+    {id:'d014',name:'Velodes Soft',kod:'106-024-0'},
+    {id:'d015',name:'Skinsept 350ml',kod:'106-045-0'},
+    {id:'d016',name:'Pakiet bezpieczeństwa Clinell',kod:'106-025-0'},
+    {id:'d017',name:'Preseptol QV 5L',kod:'106-026-0'},
+    {id:'d018',name:'Płyn spray 1l do karetek',kod:'106-027-0'},
+    {id:'d019',name:'Płyn do dezynfekcji 5L',kod:'106-028-0'},
+    {id:'d020',name:'Płyn do dezynfekcji 1L',kod:'106-029-0'},
+    {id:'d021',name:'Zestaw do suchej dekontaminacji D-14',kod:'106-047-0'},
+  ],
+    wyroby: [
+    {id:'w001',name:'Aparat do płukania oka z bocznym odpływem',kod:'104-001-0'},
+    {id:'w002',name:'Ciśnieniomierz zegarowy dla dorosłych',kod:'104-002-0'},
+    {id:'w003',name:'Ciśnieniomierz zegarowy dla dzieci',kod:'104-003-0'},
+    {id:'w004',name:'Kramer 1000x100',kod:'104-004-0'},
+    {id:'w005',name:'Kramer 1500x100',kod:'104-005-0'},
+    {id:'w006',name:'Latarka diagnostyczna',kod:'104-006-0'},
+    {id:'w007',name:'Okulary ochronne 3M',kod:'104-007-0'},
+    {id:'w008',name:'Prowadnica Bougie r.3,3mm',kod:'104-008-0'},
+    {id:'w009',name:'Prowadnica Bougie r.5,5mm',kod:'104-009-0'},
+    {id:'w010',name:'Staza zapinka latex',kod:'104-010-0'},
+    {id:'w011',name:'Słuchawki lekarskie',kod:'104-011-0'},
+    {id:'w012',name:'Resuscytator dla dorosłych',kod:'104-012-0'},
+    {id:'w013',name:'Resuscytator dla dzieci',kod:'104-013-0'},
+    {id:'w014',name:'Pulsoksymetr C101A2',kod:'104-014-0'},
+    {id:'w015',name:'Test antygenowy (20szt.-op.)',kod:'104-015-0'},
+    {id:'w016',name:'Test combo FLU/RSV',kod:'104-015-1'},
+    {id:'w017',name:'Termometr elektroniczny',kod:'104-016-0'},
+    {id:'w018',name:'BIG dla dorosłych',kod:'105-001-0'},
+    {id:'w019',name:'BIG dla dzieci',kod:'105-002-0'},
+    {id:'w020',name:'Cewnik do odsysania r.6',kod:'105-148-0'},
+    {id:'w021',name:'Cewnik do odsysania r.8 (niebieski)',kod:'105-008-0'},
+    {id:'w022',name:'Cewnik do odsysania r.10 (czarny)',kod:'105-003-0'},
+    {id:'w023',name:'Cewnik do odsysania r.12 (biały)',kod:'105-004-0'},
+    {id:'w024',name:'Cewnik do odsysania r.14 (zielony)',kod:'105-005-0'},
+    {id:'w025',name:'Cewnik do odsysania r.16 (pomarańczowy)',kod:'105-006-0'},
+    {id:'w026',name:'Cewnik do odsysania r.18 (czerwony)',kod:'105-007-0'},
+    {id:'w027',name:'Cewnik Foleya r.12',kod:'105-009-0'},
+    {id:'w028',name:'Cewnik Foleya r.14',kod:'105-010-0'},
+    {id:'w029',name:'Cewnik Foleya r.16',kod:'105-011-0'},
+    {id:'w030',name:'Cewnik Foleya r.18',kod:'105-012-0'},
+    {id:'w031',name:'Cewnik Foleya r.20',kod:'105-013-0'},
+    {id:'w032',name:'Cewnik Foleya r.22',kod:'105-014-0'},
+    {id:'w033',name:'COMBO Lifepak 12/15 defibrylator dorośli',kod:'105-015-0'},
+    {id:'w034',name:'COMBO Lifepak 12/15 defibrylator dzieci',kod:'105-151-0'},
+    {id:'w035',name:'COMBO Zoll defibrylator',kod:'105-016-0'},
+    {id:'w036',name:'Dren do tlenu',kod:'105-017-0'},
+    {id:'w037',name:'Dren do ssawki',kod:'105-146-0'},
+    {id:'w038',name:'Worek do ssawki',kod:'105-147-0'},
+    {id:'w039',name:'Dren Yankauer prosty do odsysania 210cm',kod:'105-153-0'},
+    {id:'w040',name:'Końcówka do odsysania Yankauer',kod:'105-154-0'},
+    {id:'w041',name:'EKG LFO 360 j/u. dzieci',kod:'105-018-0'},
+    {id:'w042',name:'EKG LFO 510 j/u. dorośli',kod:'105-019-0'},
+    {id:'w043',name:'Filtr do AMBU dorośli',kod:'105-020-0'},
+    {id:'w044',name:'Filtr do AMBU dzieci',kod:'105-021-0'},
+    {id:'w045',name:'Glukometr iXell lancety (100szt.-op.)',kod:'105-022-0'},
+    {id:'w046',name:'Glukometr iXell paski (50szt.-op.)',kod:'105-023-0'},
+    {id:'w047',name:'Igła nr.6',kod:'105-025-0'},
+    {id:'w048',name:'Igła nr.7',kod:'105-026-0'},
+    {id:'w049',name:'Igła nr.8',kod:'105-027-0'},
+    {id:'w050',name:'Igła nr.12 (100szt.)',kod:'105-024-0'},
+    {id:'w051',name:'Igła motylek 20G (100szt.)',kod:'105-028-0'},
+    {id:'w052',name:'Igła do BIG żółta 45mm',kod:'105-175-0'},
+    {id:'w053',name:'Igła do BIG niebieska 25mm',kod:'105-176-0'},
+    {id:'w054',name:'Igła do odbarczania odmy Angiocath',kod:'105-152-0'},
+    {id:'w055',name:'Kapturki do termometru (200szt.-op.)',kod:'105-029-0'},
+    {id:'w056',name:'Kaczka j/u. męska',kod:'105-030-0'},
+    {id:'w057',name:'Koreczek do venflonów',kod:'105-031-0'},
+    {id:'w058',name:'Kapkon łącznik do cewnika',kod:'105-187-0'},
+    {id:'w059',name:'Łyżka do laryngoskopu j/u. r.0',kod:'105-032-0'},
+    {id:'w060',name:'Łyżka do laryngoskopu j/u. r.1',kod:'105-130-0'},
+    {id:'w061',name:'Łyżka do laryngoskopu j/u. r.2',kod:'105-034-0'},
+    {id:'w062',name:'Łyżka do laryngoskopu j/u. r.3',kod:'105-132-0'},
+    {id:'w063',name:'Łyżka do laryngoskopu j/u. r.4',kod:'105-133-0'},
+    {id:'w064',name:'Łyżka Videolaryngoskop r.0',kod:'106-039-0'},
+    {id:'w065',name:'Łyżka Videolaryngoskop r.3',kod:'105-133-2'},
+    {id:'w066',name:'Łyżka Videolaryngoskop r.4',kod:'105-133-1'},
+    {id:'w067',name:'Maska flizelinowa',kod:'105-037-0'},
+    {id:'w068',name:'Maska krtaniowa j/u. nr.1',kod:'105-038-0'},
+    {id:'w069',name:'Maska krtaniowa j/u. nr.1,5',kod:'105-039-0'},
+    {id:'w070',name:'Maska krtaniowa j/u. nr.2',kod:'105-040-0'},
+    {id:'w071',name:'Maska krtaniowa j/u. nr.2,5',kod:'105-041-0'},
+    {id:'w072',name:'Maska krtaniowa j/u. nr.3',kod:'105-042-0'},
+    {id:'w073',name:'Maska krtaniowa j/u. nr.4',kod:'105-043-0'},
+    {id:'w074',name:'Maska krtaniowa j/u. nr.5',kod:'105-044-0'},
+    {id:'w075',name:'Maska krtaniowa I-GEL r.1',kod:'105-045-0'},
+    {id:'w076',name:'Maska krtaniowa I-GEL r.2',kod:'105-046-0'},
+    {id:'w077',name:'Maska krtaniowa I-GEL r.3',kod:'105-047-0'},
+    {id:'w078',name:'Maska krtaniowa I-GEL r.4',kod:'105-048-0'},
+    {id:'w079',name:'Maska krtaniowa I-GEL r.5',kod:'105-049-0'},
+    {id:'w080',name:'Maska tlenowa dla dorosłych',kod:'105-050-0'},
+    {id:'w081',name:'Maska tlenowa dla dzieci',kod:'105-051-0'},
+    {id:'w082',name:'Maska tlenowa dla dorosłych z rezerwuarem',kod:'105-052-0'},
+    {id:'w083',name:'Maska tlenowa dla dzieci z rezerwuarem',kod:'105-053-0'},
+    {id:'w084',name:'Maska twarzowa do AMBU r.0',kod:'105-160-0'},
+    {id:'w085',name:'Maska twarzowa do AMBU r.1',kod:'105-054-0'},
+    {id:'w086',name:'Maska twarzowa do AMBU r.2',kod:'105-055-0'},
+    {id:'w087',name:'Maska twarzowa do AMBU r.3',kod:'105-056-0'},
+    {id:'w088',name:'Maska twarzowa do AMBU r.4',kod:'105-057-0'},
+    {id:'w089',name:'Maska twarzowa do AMBU r.5',kod:'105-058-0'},
+    {id:'w090',name:'Maska z nebulizatorem dla dorosłych',kod:'105-059-0'},
+    {id:'w091',name:'Maska z nebulizatorem dla dzieci',kod:'105-060-0'},
+    {id:'w092',name:'Maska FFP2/KN95/FFP3',kod:'105-155-0'},
+    {id:'w093',name:'Maska pełnotwarzowa',kod:'105-165-0'},
+    {id:'w094',name:'Półmaska twarzowa',kod:'105-166-0'},
+    {id:'w095',name:'FFP3 Półmaska X310SV RD z zaworem D7',kod:'105-170-0'},
+    {id:'w096',name:'Filtr do masek',kod:'105-167-0'},
+    {id:'w097',name:'Maseczka medyczna chirurgiczna',kod:'105-158-0'},
+    {id:'w098',name:'Miska nerkowa j/u.',kod:'105-061-0'},
+    {id:'w099',name:'Okleina do venflona 8x6cm (100szt.-op.)',kod:'105-062-0'},
+    {id:'w100',name:'Pęseta sterylna j/u.',kod:'105-063-0'},
+    {id:'w101',name:'Pieluchomajtki r.L',kod:'105-064-0'},
+    {id:'w102',name:'Prowadnica do rurek intub. 2,2mm',kod:'105-065-0'},
+    {id:'w103',name:'Prowadnica do rurek intub. 3,3mm (CH10)',kod:'105-066-0'},
+    {id:'w104',name:'Prowadnica do rurek intub. 4,7mm (CH14)',kod:'105-067-0'},
+    {id:'w105',name:'Przedłużacz do pompy 150cm',kod:'105-068-0'},
+    {id:'w106',name:'Przylepiec dla dzieci plaster',kod:'105-069-0'},
+    {id:'w107',name:'Prześcieradło j/u. w rolce',kod:'105-070-0'},
+    {id:'w108',name:'Prześcieradło medyczne j/u. 160x250 (10szt.)',kod:'105-149-0'},
+    {id:'w109',name:'Quicktrach dla dorosłych',kod:'105-071-0'},
+    {id:'w110',name:'Quicktrach dla dzieci',kod:'105-072-0'},
+    {id:'w111',name:'Rękawice nitrylowe XS',kod:'105-162-0'},
+    {id:'w112',name:'Rękawice nitrylowe S',kod:'105-076-0'},
+    {id:'w113',name:'Rękawice nitrylowe M',kod:'105-075-0'},
+    {id:'w114',name:'Rękawice nitrylowe L',kod:'105-074-0'},
+    {id:'w115',name:'Rękawice nitrylowe XL',kod:'105-073-0'},
+    {id:'w116',name:'Rękawice nitrylowe XL 180szt. COVID',kod:'105-159-0'},
+    {id:'w117',name:'Rękawice nitrylowe L 100szt. D7',kod:'105-172-0'},
+    {id:'w118',name:'Rękawice nitrylowe XL 100szt. D7',kod:'105-173-0'},
+    {id:'w119',name:'Rękawice sterylne r.7',kod:'105-077-0'},
+    {id:'w120',name:'Rękawice sterylne r.8',kod:'105-078-0'},
+    {id:'w121',name:'Rękawice sterylne r.9',kod:'105-079-0'},
+    {id:'w122',name:'Rękawice chirurgiczne lateksowe M (6,0)',kod:'105-157-0'},
+    {id:'w123',name:'Rurka intubacyjna z mank. 2,5',kod:'105-080-0'},
+    {id:'w124',name:'Rurka intubacyjna z mank. 3,0',kod:'105-081-0'},
+    {id:'w125',name:'Rurka intubacyjna z mank. 3,5',kod:'105-082-0'},
+    {id:'w126',name:'Rurka intubacyjna z mank. 4,0',kod:'105-083-0'},
+    {id:'w127',name:'Rurka intubacyjna z mank. 4,5',kod:'105-084-0'},
+    {id:'w128',name:'Rurka intubacyjna z mank. 5,0',kod:'105-085-0'},
+    {id:'w129',name:'Rurka intubacyjna z mank. 5,5',kod:'105-086-0'},
+    {id:'w130',name:'Rurka intubacyjna z mank. 6,0',kod:'105-087-0'},
+    {id:'w131',name:'Rurka intubacyjna z mank. 6,5',kod:'105-088-0'},
+    {id:'w132',name:'Rurka intubacyjna z mank. 7,0',kod:'105-089-0'},
+    {id:'w133',name:'Rurka intubacyjna z mank. 7,5',kod:'105-090-0'},
+    {id:'w134',name:'Rurka intubacyjna z mank. 8,0',kod:'105-091-0'},
+    {id:'w135',name:'Rurka intubacyjna z mank. 8,5',kod:'105-092-0'},
+    {id:'w136',name:'Rurka intubacyjna z mank. 9,0',kod:'105-093-0'},
+    {id:'w137',name:'Rurka intubacyjna z mank. 9,5',kod:'105-094-0'},
+    {id:'w138',name:'Rurka LT r.1',kod:'105-095-0'},
+    {id:'w139',name:'Rurka LT r.2',kod:'105-096-0'},
+    {id:'w140',name:'Rurka LT r.3',kod:'105-097-0'},
+    {id:'w141',name:'Rurka LT r.4',kod:'105-098-0'},
+    {id:'w142',name:'Rurka LT r.5',kod:'105-099-0'},
+    {id:'w143',name:'Rurka UG 000',kod:'105-101-0'},
+    {id:'w144',name:'Rurka UG 00',kod:'105-161-0'},
+    {id:'w145',name:'Rurka UG 0',kod:'105-100-0'},
+    {id:'w146',name:'Rurka UG 1 (biała)',kod:'105-102-0'},
+    {id:'w147',name:'Rurka UG 2 (zielona)',kod:'105-103-0'},
+    {id:'w148',name:'Rurka UG 3 (żółta)',kod:'105-104-0'},
+    {id:'w149',name:'Rurka UG 4 (czerwona/pomarańczowa)',kod:'105-105-0'},
+    {id:'w150',name:'Rurka UG 5 (niebieska 110mm)',kod:'105-186-0'},
+    {id:'w151',name:'Rurka nosowo-gardłowa 16 (5,3mm)',kod:'105-184-0'},
+    {id:'w152',name:'Rurka nosowo-gardłowa 18 (6,0mm)',kod:'105-185-0'},
+    {id:'w153',name:'Rurka nosowo-gardłowa 20 (7,0mm)',kod:'105-180-0'},
+    {id:'w154',name:'Rurka nosowo-gardłowa 22 (7,3mm)',kod:'105-181-0'},
+    {id:'w155',name:'Rurka nosowo-gardłowa 24 (8,0mm)',kod:'105-182-0'},
+    {id:'w156',name:'Rurka nosowo-gardłowa 26 (8,7mm)',kod:'105-183-0'},
+    {id:'w157',name:'Sonda żołądkowa r.14',kod:'105-106-0'},
+    {id:'w158',name:'Sonda żołądkowa r.16',kod:'105-107-0'},
+    {id:'w159',name:'Sonda żołądkowa r.18',kod:'105-108-0'},
+    {id:'w160',name:'Stabilizator do rurek intubacyjnych',kod:'105-109-0'},
+    {id:'w161',name:'Stabilizator miednicy pas',kod:'105-109-1'},
+    {id:'w162',name:'Strzykawka 2ml (100szt.)',kod:'105-112-0'},
+    {id:'w163',name:'Strzykawka 5ml',kod:'105-113-0'},
+    {id:'w164',name:'Strzykawka 10ml (100szt.)',kod:'105-110-0'},
+    {id:'w165',name:'Strzykawka 20ml (100szt.)',kod:'105-111-0'},
+    {id:'w166',name:'Strzykawka 20ml Luer lock',kod:'106-040-0'},
+    {id:'w167',name:'Strzykawka 3ml Luer lock',kod:'105-116-0'},
+    {id:'w168',name:'Strzykawka 50ml do cewnikowania',kod:'105-114-0'},
+    {id:'w169',name:'Strzykawka 50ml do pompy infuzyjnej',kod:'105-115-0'},
+    {id:'w170',name:'Szczątki rękawice L',kod:'105-117-0'},
+    {id:'w171',name:'Szczątki rękawice M',kod:'105-118-0'},
+    {id:'w172',name:'Szczątki rękawice S',kod:'105-119-0'},
+    {id:'w173',name:'Szpatułki',kod:'105-120-0'},
+    {id:'w174',name:'Venflon bezpieczny r.14G (pomarańczowy)',kod:'106-037-0'},
+    {id:'w175',name:'Venflon bezpieczny r.16G (szary)',kod:'106-036-0'},
+    {id:'w176',name:'Venflon bezpieczny r.17G (biały)',kod:'105-121-0'},
+    {id:'w177',name:'Venflon bezpieczny r.18G (zielony)',kod:'105-122-0'},
+    {id:'w178',name:'Venflon bezpieczny r.20G (różowy) 50szt.',kod:'105-123-0'},
+    {id:'w179',name:'Venflon bezpieczny r.22G (niebieski)',kod:'105-124-0'},
+    {id:'w180',name:'Venflon bezpieczny r.24G (żółty)',kod:'105-125-0'},
+    {id:'w181',name:'Wąsy tlenowe',kod:'105-126-0'},
+    {id:'w182',name:'Worek na mocz',kod:'105-127-0'},
+    {id:'w183',name:'Worek na wymioty',kod:'105-128-0'},
+    {id:'w184',name:'Zestaw porodowy',kod:'105-129-0'},
+    {id:'w185',name:'Aparat do kroplówki (25szt.-op.)',kod:'105-134-0'},
+    {id:'w186',name:'Przyrząd do szybkiego przetaczania',kod:'105-135-0'},
+    {id:'w187',name:'Kołnierz ortopedyczny dla dorosłych',kod:'105-136-0'},
+    {id:'w188',name:'Kołnierz ortopedyczny dla dzieci',kod:'105-137-0'},
+    {id:'w189',name:'Kranik trójdzielny (50szt.)',kod:'105-138-0'},
+    {id:'w190',name:'Opaska ID dla dorosłych i dzieci',kod:'105-139-0'},
+    {id:'w191',name:'Pokrowiec na zwłoki flizelina dorośli',kod:'105-140-0'},
+    {id:'w192',name:'Pokrowiec na zwłoki flizelina dzieci',kod:'105-143-0'},
+    {id:'w193',name:'Zestaw do centralnego wkłucia j. opłucnej',kod:'105-142-0'},
+    {id:'w194',name:'Adapter do kapnografu EMMA dorośli',kod:'105-144-0'},
+    {id:'w195',name:'Adapter do kapnometru NONIN',kod:'105-145-0'},
+    {id:'w196',name:'Końcówka do kapnometru LIFEPAK',kod:'106-041-0'},
+    {id:'w197',name:'Korek dozujący na butelkę 5-20ml',kod:'105-150-0'},
+    {id:'w198',name:'Kombinezon Tyvek/Tychem/Pro-Tex',kod:'105-156-0'},
+    {id:'w199',name:'Kombinezon OXYCHEM D7',kod:'105-171-0'},
+    {id:'w200',name:'Gogle',kod:'105-163-0'},
+    {id:'w201',name:'Przyłbice ochronne',kod:'105-164-0'},
+    {id:'w202',name:'Fartuch flizelinowy',kod:'105-168-0'},
+    {id:'w203',name:'Osłona na buty',kod:'105-169-0'},
+    {id:'w204',name:'Bandaż samoprzylepny 10cm x 4m',kod:'105-174-0'},
+    {id:'w205',name:'Aplikator donosowy',kod:'105-177-0'},
+    {id:'w206',name:'Staza taktyczna',kod:'105-178-0'},
+    {id:'w207',name:'Lucas nakładka',kod:'105-179-0'},
+    {id:'w208',name:'Papier do EKG 110x10',kod:'106-014-0'},
+    {id:'w209',name:'Papier do EKG 112x25',kod:'106-015-0'},
+    {id:'w210',name:'Papier Lifepak 12/15',kod:'106-016-0'},
+    {id:'w211',name:'Papier do EKG B5 ECo 58mm',kod:'106-019-0'},
+    {id:'w212',name:'Papier ZOLL',kod:'106-020-0'},
+    {id:'w213',name:'Papier do EKG 60x25',kod:'106-022-0'},
+    {id:'w214',name:'Papier defibrylator LP15 zamiennik (5szt.)',kod:'106-031-0'},
+    {id:'w215',name:'Żel EKG 250ml',kod:'106-021-0'},
+    {id:'w216',name:'Żel do USG biały 0,5l',kod:'106-032-0'},
+    {id:'w217',name:'Pojemnik na mat. skaż. 0,7L',kod:'106-017-0'},
+    {id:'w218',name:'Pojemnik na mat. skaż. 5L',kod:'106-018-0'},
+    {id:'w219',name:'Układ oddechowy do respiratora turbinowego',kod:'106-034-0'},
+    {id:'w220',name:'Układ oddechowy do respiratora DRAGER',kod:'106-038-0'},
+    {id:'w221',name:'Układ oddechowy PARAPAC',kod:'106-042-0'},
+    {id:'w222',name:'Podkład medyczny absorbujący 80x210 (5szt.)',kod:'106-043-0'},
+    {id:'w223',name:'Podkład w rolce 50x50',kod:'106-044-0'},
+    {id:'w224',name:'Kramer szyna 500x70',kod:'106-013-0'},
+    {id:'w225',name:'Płyn Ringer 250ml',kod:'106-030-0'},
+    {id:'w226',name:'ICEMIX 400ml',kod:'106-023-0'},
+    {id:'w227',name:'Cipronex tab. (10tab.)',kod:'106-033-0'},
+  ],
+};
+
+const catMeta = {
+  leki:       {label:'Leki',                   bg:'#dbeafe',color:'#1e40af'},
+  opatrunki:  {label:'Opatrunki',              bg:'#d1fae5',color:'#065f46'},
+  wyroby:     {label:'Wyrób medyczny',         bg:'#ede9fe',color:'#5b21b6'},
+  dezynfekcja:{label:'Dezynfekcja',            bg:'#fef3c7',color:'#b45309'},
+};
+
+let currentCategory = 'leki';
+let products = allProducts.leki;
+let unitState = {};
+let csvData = '';
+let emailData = '';
+
+document.getElementById('headerDate').textContent = new Date().toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'});
+document.getElementById('dt').value = new Date().toISOString().split('T')[0];
+
+function setCategory(cat) {
+  currentCategory = cat;
+  products = allProducts[cat] || [];
+  ['leki','opatrunki','wyroby','dezynfekcja'].forEach(k => document.getElementById('tab-'+k).classList.toggle('active', k===cat));
+  document.getElementById('searchInput').value = '';
+  const ph = {leki:'Szukaj leku...', opatrunki:'Szukaj opatrunku...', wyroby:'Szukaj wyrobu...', dezynfekcja:'Szukaj środka...'};
+  document.getElementById('searchInput').placeholder = ph[cat] || 'Szukaj...';
+  buildList();
+}
+
+function buildList() {
+  const list = document.getElementById('prodList');
+  list.innerHTML = '';
+  const cs = catMeta[currentCategory];
+  products.forEach(p => {
+    unitState[p.id] = unitState[p.id] || 'szt';
+    const div = document.createElement('div');
+    div.className = 'prod-card';
+    div.setAttribute('data-name', p.name.toLowerCase());
+    div.id = 'card-'+p.id;
+    const savedEl = document.getElementById('q-'+p.id);
+    const savedQty = savedEl ? (savedEl.value||'') : '';
+    const hasSel = parseInt(savedQty) > 0;
+    if(hasSel) div.classList.add('selected');
+    div.innerHTML = `
+      <div class="prod-card-top">
+        <div>
+          <div class="prod-name">${p.name}</div>
+          <span class="prod-cat" style="background:${cs.bg};color:${cs.color}">${cs.label}</span>
+        </div>
+        <div id="rs-${p.id}" style="font-size:13px;font-weight:500;color:var(--blue);white-space:nowrap">${hasSel?savedQty+' '+(unitState[p.id]==='opk'?'opak.':'szt.'):''}</div>
+      </div>
+      <div class="prod-card-bottom">
+        <input type="number" class="qty-input${hasSel?' has-val':''}" id="q-${p.id}" min="0" placeholder="0" value="${savedQty}" inputmode="numeric" pattern="[0-9]*" oninput="onQty('${p.id}')">
+        <div class="unit-toggle">
+          <button class="${unitState[p.id]==='szt'?'sel':''}" id="us-${p.id}" onclick="setUnit('${p.id}','szt')">Sztuka</button>
+          <button class="${unitState[p.id]==='opk'?'sel':''}" id="uo-${p.id}" onclick="setUnit('${p.id}','opk')">Opakowanie</button>
+        </div>
+      </div>`;
+    list.appendChild(div);
+  });
+  updateTotal();
+}
+
+function filterProducts() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  let visible = 0;
+  products.forEach(p => {
+    const card = document.getElementById('card-'+p.id);
+    if(!card) return;
+    const match = !q || p.name.toLowerCase().includes(q);
+    card.classList.toggle('hidden-row', !match);
+    if(match) visible++;
+  });
+  document.getElementById('noResults').style.display = visible===0?'block':'none';
+}
+
+function setUnit(id, u) {
+  unitState[id] = u;
+  document.getElementById('us-'+id).classList.toggle('sel', u==='szt');
+  document.getElementById('uo-'+id).classList.toggle('sel', u==='opk');
+  updateRowSum(id);
+  updateTotal();
+}
+
+function onQty(id) {
+  const el = document.getElementById('q-'+id);
+  const v = parseInt(el.value)||0;
+  el.classList.toggle('has-val', v>0);
+  document.getElementById('card-'+id).classList.toggle('selected', v>0);
+  updateRowSum(id);
+  updateTotal();
+}
+
+function updateRowSum(id) {
+  const v = parseInt(document.getElementById('q-'+id).value)||0;
+  const el = document.getElementById('rs-'+id);
+  if(el) el.textContent = v>0 ? v+' '+(unitState[id]==='opk'?'opak.':'szt.') : '';
+}
+
+function updateTotal() {
+  const allP = [...allProducts.leki,...allProducts.opatrunki,...allProducts.wyroby,...allProducts.dezynfekcja];
+  const c = allP.filter(p=>{ const el=document.getElementById('q-'+p.id); return el&&(parseInt(el.value)||0)>0; }).length;
+  document.getElementById('totalCount').textContent = c===0?'0 produktów':c+' '+(c===1?'produkt':c<5?'produkty':'produktów');
+}
+
+function onLoc() {
+  const v = document.getElementById('loc').value;
+  document.getElementById('f-loc').classList.remove('error');
+  if(v) {
+    const [kod,city] = v.split('|');
+    document.getElementById('zrmKod').textContent = kod;
+    document.getElementById('zrmCity').textContent = city;
+    document.getElementById('zrmCard').classList.add('vis');
+  } else { document.getElementById('zrmCard').classList.remove('vis'); }
+}
+
+function goTo(step) {
+  if(step===2 && !document.getElementById('loc').value) {
+    document.getElementById('f-loc').classList.add('error'); return;
+  }
+  [1,2,3].forEach(i => {
+    document.getElementById('s'+i).classList.remove('active');
+    const sn=document.getElementById('sn'+i), st=document.getElementById('step'+i);
+    if(i<step){ sn.textContent=''; st.className='step done'; }
+    else if(i===step){ sn.textContent=String(i); st.className='step active'; }
+    else{ sn.textContent=String(i); st.className='step'; }
+  });
+  document.getElementById('s'+step).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function submitOrder() {
+  const fn=document.getElementById('fn').value.trim(), ln=document.getElementById('ln').value.trim();
+  const pos=document.getElementById('pos').value.trim(), dt=document.getElementById('dt').value;
+  let ok=true;
+  [['fn',fn,'f-fn'],['ln',ln,'f-ln'],['pos',pos,'f-pos'],['dt',dt,'f-dt']].forEach(([,v,fid])=>{
+    const el=document.getElementById(fid);
+    if(!v){el.classList.add('error');ok=false;}else el.classList.remove('error');
+  });
+  if(!ok) return;
+  const [locKod,locCity]=document.getElementById('loc').value.split('|');
+  const allP=[...allProducts.leki,...allProducts.opatrunki,...allProducts.wyroby,...allProducts.dezynfekcja];
+  const ordered=allP.filter(p=>{ const el=document.getElementById('q-'+p.id); return el&&(parseInt(el.value)||0)>0; });
+
+  // Plik do importu w Optimie: Lp; Kod; Nazwa asortymentu; Ilość; Jednostka
+  let rows=['Lp;Kod;Nazwa asortymentu;Ilość;Jednostka'];
+  ordered.forEach((p, idx)=>{
+    const qty=parseInt(document.getElementById('q-'+p.id).value)||0;
+    const jed=unitState[p.id]==='opk'?'OPK':'SZT';
+    rows.push([idx+1, p.kod, `"${p.name}"`, qty, jed].join(';'));
+  });
+  csvData=rows.join('\r\n');
+
+  // Dane do emaila (pełne)
+  const pCatFn = (p) => allProducts.leki.find(x=>x.id===p.id)?'Leki':allProducts.opatrunki.find(x=>x.id===p.id)?'Opatrunki':allProducts.dezynfekcja.find(x=>x.id===p.id)?'Środki dezynfekcyjne':'Wyroby medyczne';
+  let emailRows=['Numer dokumentu;Data;ZRM;Miejscowość;Zamawiający;Stanowisko;Kod towaru;Nazwa towaru;Ilość;Jednostka;Kategoria'];
+  ordered.forEach(p=>{
+    const qty=parseInt(document.getElementById('q-'+p.id).value)||0;
+    emailRows.push(['ZAM/'+dt.replace(/-/g,'')+'/'+Math.floor(Math.random()*900+100),dt,locKod,`"${locCity}"`,`"${fn} ${ln}"`,`"${pos}"`,p.kod,`"${p.name}"`,qty,unitState[p.id]==='opk'?'OPK':'SZT',`"${pCatFn(p)}"`].join(';'));
+  });
+  emailData = emailRows.join('\r\n');
+
+  // Auto-pobierz plik CSV gotowy do Optimy
+  const BOM='\uFEFF';
+  const blob=new Blob([BOM+csvData],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='zamowienie_optima_'+locKod.replace(/ /g,'_')+'_'+dt.replace(/-/g,'')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  [1,2,3].forEach(i=>{
+    document.getElementById('s'+i).classList.remove('active');
+    document.getElementById('step'+i).className='step done';
+    document.getElementById('sn'+i).textContent='';
+  });
+  document.getElementById('sOk').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function sendEmail() {
+  const btn = document.getElementById('sendBtn');
+  const box = document.getElementById('statusBox');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Wysyłanie...';
+  box.style.display = 'flex';
+  box.className = 'status-box sending';
+  box.innerHTML = '<div class="spinner"></div> Trwa wysyłanie wiadomości...';
+
+  const fn=document.getElementById('fn').value.trim();
+  const ln=document.getElementById('ln').value.trim();
+  const dt=document.getElementById('dt').value;
+  const [locKod,locCity]=document.getElementById('loc').value.split('|');
+
+  try {
+    const res = await fetch(SEND_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        key: SECRET_KEY,
+        subject: `Zamówienie ZRM ${locKod} — ${fn} ${ln} — ${dt}`,
+        from_name: `${fn} ${ln}`,
+        zrm: `${locKod} — ${locCity}`,
+        data: dt,
+        stanowisko: document.getElementById('pos').value.trim(),
+        zamowienie: emailData || csvData,
+      })
+    });
+    const json = await res.json();
+    if(res.ok && json.status==='ok') {
+      box.className = 'status-box sent';
+      box.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Zamówienie wysłane do koordynatora!';
+      btn.style.display = 'none';
+    } else {
+      throw new Error(json.message || 'Błąd serwera');
+    }
+  } catch(err) {
+    box.className = 'status-box error';
+    box.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Błąd: ${err.message}`;
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg> Spróbuj ponownie';
+  }
+}
+
+function resetForm() {
+  document.getElementById('loc').value='';
+  document.getElementById('zrmCard').classList.remove('vis');
+  ['fn','ln','pos'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('dt').value=new Date().toISOString().split('T')[0];
+  ['f-loc','f-fn','f-ln','f-pos','f-dt'].forEach(id=>document.getElementById(id).classList.remove('error'));
+  document.getElementById('sOk').classList.remove('active');
+  document.getElementById('noResults').style.display='none';
+  document.getElementById('statusBox').style.display='none';
+  document.getElementById('sendBtn').style.display='';
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('sendBtn').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg> Wyślij zamówienie';
+  [1,2,3].forEach(i=>{document.getElementById('step'+i).className='step';document.getElementById('sn'+i).textContent=String(i);});
+ 
+  document.getElementById('step1').className='step active';
+  unitState={};
+  setCategory('leki');
+  document.getElementById('s1').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildList();
+</script>
+</body>
+</html>
